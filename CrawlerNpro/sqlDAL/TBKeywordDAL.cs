@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CrawlerNpro.sqlDAL
 {
-  public  class TBKeyWordDAL
+    public class TBKeyWordDAL
     {
 
 #if DEBUG
@@ -22,8 +22,8 @@ namespace CrawlerNpro.sqlDAL
         /// <returns></returns>
         public int InsertSysKeyworld(MySqlConnection sqlconn, List<KeyWorldEntity> listKeyWorldEntity)
         {
-           int result = 0;
-          KeyWorldEntity keyWorldEntity = new KeyWorldEntity();
+            int result = 0;
+            KeyWorldEntity keyWorldEntity = new KeyWorldEntity();
             string sql = "INSERT INTO homefood.sys_key_world(KeyWorld,HotLeve) VALUE(@KeyWorld,@HotLeve)";
             try
             {
@@ -37,7 +37,7 @@ namespace CrawlerNpro.sqlDAL
                     cmd.Parameters.Add(keyWorld);
                     cmd.Parameters.Add(hotLeve);
                     sqlconn.Open();
-                    result= cmd.ExecuteNonQuery();
+                    result = cmd.ExecuteNonQuery();
                     sqlconn.Close();
                 };
             }
@@ -54,7 +54,7 @@ namespace CrawlerNpro.sqlDAL
         /// <param name="sqlconn"></param>
         /// <param name="keyWorldEntity"></param>
         /// <returns></returns>
-        public List<KeyWorldEntity> SelectSysKeyworld(MySqlConnection sqlconn, KeyWorldEntity keyWorldEntity=null)
+        public List<KeyWorldEntity> SelectSysKeyworld(MySqlConnection sqlconn, KeyWorldEntity keyWorldEntity = null)
         {
             List<KeyWorldEntity> listKeyWorldEntity = new List<KeyWorldEntity>();
             try
@@ -80,8 +80,6 @@ namespace CrawlerNpro.sqlDAL
             }
             return listKeyWorldEntity;
         }
-
-    
 #endif
     }
 }

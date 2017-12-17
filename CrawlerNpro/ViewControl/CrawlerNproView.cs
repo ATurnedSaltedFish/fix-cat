@@ -13,16 +13,16 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+
 namespace CrawlerNpro.ViewControl
 {
-    public class CrawlerNpro
+ public   class CrawlerNproView
     {
-        public async void SearchStart(string url)
+  
+        public async void SearchStart(string url,string fileName)
         {
             Elements elements;
             string strGetConetex = null;
-           // var url = this.txtUri.Text.Trim();
-         
             CrHttpRequest crHttpRequest = new CrHttpRequest();
             strGetConetex = await crHttpRequest.SentDataAsync(HttpMethod.Post, url);
             if (strGetConetex.Length > 0)
@@ -34,15 +34,6 @@ namespace CrawlerNpro.ViewControl
                 Elements elementTbNum = document.GetElementsByClass("card_infoNum");
                 Elements elementTbName = document.GetElementsByClass("card_title_fname");
                 Elements elementTbTitle = document.Select("li.j_thread_list").Select("li.clearfix");
-                //获取内容块
-                //    Elements elementTbTitle =document.Select("div.threadlist_title").Select("div.pull_left ").Select("div.j_th_tit");//获取 发帖得标题 和标签得 url
-                //     string data = "发帖数:" + elementTbNum.ToString() + "贴吧名称:" + elementTbName.ToString() + elementTbTitle;
-                //his.txtContent.Text = data;
-
-                //NSoup.Nodes.Document docomentChild = NSoup.NSoupClient.Parse(elementTbTitle.ToString());
-                //Elements elementTbChildReplies = docomentChild.Select("span.threadlist_rep_num").Select("span.center_text");
-                //Elements elementTbUrl = docomentChild.Select("a.j_th_tit");
-                //this.txtContent.Text = elementTbTitle.ToString();
                 List<TitleContentEntity> listContentEntity = new List<TitleContentEntity>();//内容
                 List<ResultEntity> listResultEntity = new List<ResultEntity>();//所有内容
                 try
@@ -50,7 +41,6 @@ namespace CrawlerNpro.ViewControl
                     for (int i = 0; i < elementTbTitle.Count; i++)
                     {
                         var elementss = elementTbTitle[i];
-                        //  Document docomentChild = NSoup.NSoupClient.Parse(elementTbTitle.ToString());
                         Elements elementTbChildReplies = elementss.Select("span.threadlist_rep_num").Select("span.center_text");
                         Elements elementTbUrl = elementss.Select("a.j_th_tit");
                         Debug.WriteLine(elementTbChildReplies + "/n/r" + elementTbUrl);
@@ -58,13 +48,7 @@ namespace CrawlerNpro.ViewControl
                         ResultEntity resultEntity = new ResultEntity();
                         if (elementTbUrl.ToString().Contains("href"))
                         {
-                            // string reg = @"<a> *href=([""'])?(?(.*?)[^'""]+)\1[^>]*>";
-                            //Regex regUrl = new Regex(@"(/p/[0-9]{10})");
-                            //Regex regTitle = new Regex(">(.*?)<");
-                            //<a href="/p/5388999580" title="求大佬帮忙p个图" target="_blank" class="j_th_tit ">求大佬帮忙p个图</a>
-                            //Regex regUrl = new Regex(@"<a?* href=\/p\/^(.*?) */a> ");
                             var resultUrl = regUrl.Match(elementTbUrl.ToString()).ToString();
-
                             var tempData = regTitle.Match(elementTbUrl.ToString()).ToString();
                             var resultTitle = tempData.Substring(1, tempData.Length - 2);
                             resultEntity.Title = resultTitle;
@@ -89,14 +73,18 @@ namespace CrawlerNpro.ViewControl
                             FilterListResultEntity.Add(item);
                         }
                     }
+                    IOFileHelper ioFileHelper = new IOFileHelper();
+                    if (ioFileHelper.SaveJsonFile(@"E:\jsonFileSave\", "" + fileName + ".json", FilterListResultEntity.ToString()) == false)
+                    {
+                        Debug.WriteLine("文件写入出错");
+                    }
                     TBTitleListService tBTitleListService = new TBTitleListService();
                     tBTitleListService.InsertTBTItleList(MySqlConn.GetMysqlConn(), FilterListResultEntity);//添加到数据库
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    throw;
+                    Debug.WriteLine("-------CrawlerNproView Error------" + e);
                 }
-
                 //      //********************************************************************************//
                 //    List<ContentEntity> listContentEntity = new List<ContentEntity>();//内容
                 //    List<RepliesEneity> listRepliesEneity = new List<RepliesEneity>();//回复
@@ -167,4 +155,5 @@ namespace CrawlerNpro.ViewControl
 
 #endif
     }
+}
 }

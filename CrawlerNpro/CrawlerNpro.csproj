@@ -110,7 +110,7 @@
     <Compile Include="toolkit\MysqlHelper.cs" />
     <Compile Include="toolkit\IOFileHelper.cs" />
     <Compile Include="toolkit\TimeToolkit.cs" />
-    <Compile Include="ViewControl\CrawlerNpro.cs" />
+    <Compile Include="ViewControl\CrawlerNproView.cs" />
     <Page Include="CrawlerNpro.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
