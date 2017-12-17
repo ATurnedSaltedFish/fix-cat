@@ -153,7 +153,7 @@ namespace CrawlerNpro
                 JsonHelper jsonHelper = new JsonHelper();
                 var strlistJson = jsonHelper.SerializerJson(listContent);
                 IOFileHelper ioFileHelper = new IOFileHelper();
-                if (ioFileHelper.SaveJsonFile(@"C:\Users\LcAns\Desktop\jsonFileSave\", "" + fileName + ".json", strlistJson) ==false)
+                if (ioFileHelper.SaveJsonFile(@"C:\Users\xx\Desktop\jsonFileSave", "" + fileName + ".json", strlistjson)==false)
                 {
                     Debug.WriteLine("文件写入出错");
                 } 
