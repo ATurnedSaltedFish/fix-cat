@@ -1,4 +1,5 @@
 ﻿using CrawlerNpro.entity;
+using CrawlerNpro.Model;
 using CrawlerNpro.ServiceInput;
 using CrawlerNpro.sqlDAL;
 using CrawlerNpro.toolkit;
@@ -44,7 +45,6 @@ namespace CrawlerNpro.ViewControl
                         Elements elementTbChildReplies = elementss.Select("span.threadlist_rep_num").Select("span.center_text");
                         Elements elementTbUrl = elementss.Select("a.j_th_tit");
                         Debug.WriteLine(elementTbChildReplies + "/n/r" + elementTbUrl);
-
                         ResultEntity resultEntity = new ResultEntity();
                         if (elementTbUrl.ToString().Contains("href"))
                         {
@@ -74,7 +74,7 @@ namespace CrawlerNpro.ViewControl
                         }
                     }
                     IOFileHelper ioFileHelper = new IOFileHelper();
-                    if (ioFileHelper.SaveJsonFile(@"E:\jsonFileSave\", "" + fileName + ".json", FilterListResultEntity.ToString()) == false)
+                    if (ioFileHelper.SaveJsonFile(@"E:\jsonFileSave\", "" + fileName + ".json", FilterListResultEntity.ToString(),false) == false)
                     {
                         Debug.WriteLine("文件写入出错");
                     }
@@ -127,6 +127,115 @@ namespace CrawlerNpro.ViewControl
             }
         }
 
+
+        public  async Task<GetContextModel>  GetContext(string url ,string pageSize="1")
+        {
+            GetContextModel getContextModel = new GetContextModel();
+            if (url==null||pageSize==null)
+            {
+                //错误报告?pn=3
+                //  url = @"5463733135";
+            }
+            var strUrl = @"https://tieba.baidu.com/p/" + url + "?pn=" + pageSize;
+            Regex getAttContex = new Regex(@">(.*?)<");
+            Regex regTime = new Regex(@"20\d{2}(-|\/)((0[1-9])|(1[0-2]))(-|\/)((0[1-9])|([1-2][0-9])|(3[0-1]))(T|\s)(([0-1][0-9])|(2[0-3])):([0-5][0-9])");
+            string strGetConetex = null;
+            string pageNumber = null;
+            string repelyNumber = null;
+            string fileName = "5463733135";
+            CrHttpRequest crHttpRequest = new CrHttpRequest();
+            strGetConetex = await crHttpRequest.SentDataAsync(HttpMethod.Post, strUrl);
+            List<ContentEntity> listContent = new List<ContentEntity>();
+            ContentEntity contenEntity = new ContentEntity();
+            if (strGetConetex.Length > 0)
+            {
+                Document document = NSoup.NSoupClient.Parse(strGetConetex);
+                //Elements elementTbNum = document.GetElementsByClass("card_infoNum");
+                //Elements elementTbName = document.GetElementsByClass("card_title_fname");
+                Elements elementTbTitle = document.Select("div.l_post").Select("div.l_post_bright").Select("div.j_l_post").Select("div.clearfix");
+                //获取回复和分页数
+                var tempAttribute = document.Select("li.l_reply_num").First().ToString();
+                Elements pageNum = NSoup.NSoupClient.Parse(tempAttribute).Select("li.l_reply_num");
+                foreach (var item in pageNum)
+                {
+                    var replyNumPage = NSoup.NSoupClient.Parse(item.ToString()).Select("span").ToString();
+                    if (replyNumPage.Contains("style"))// 回复数
+                    {
+                        var tempRn = getAttContex.Match(replyNumPage).ToString();
+                        repelyNumber = tempRn.Substring(1, tempRn.Length - 2);
+              
+                    }
+                    if (replyNumPage.Contains("red"))//分页数
+                    {
+                        var tempPn = getAttContex.Match(replyNumPage).NextMatch().ToString();
+                        pageNumber = tempPn.Substring(1, tempPn.Length - 2);
+                    }
+                }
+                //this.txtContent.Text = elementTbTitle.ToString();
+                foreach (var item in elementTbTitle)
+                {
+                    ContentEntity contenEntityTemp = new ContentEntity();
+                    var data = NSoup.NSoupClient.Parse(item.ToString());
+                    Debug.WriteLine(data);
+                    //cc 标签
+                    var content = NSoup.NSoupClient.Parse(data.ToString()).Select("cc");
+                    if (content.Count == 0)
+                    {
+                         getContextModel.State = "300";
+                        Debug.WriteLine("-------------------贴内容为空----error400-------");
+                    }
+                    else
+                    {
+                        //span  楼层 和时间
+                        var span = data.Select("span.tail-info");
+                        contenEntityTemp.Url = url;
+                        var tempContent = Regex.Replace(content.ToString(), "<[^>]+>", "");
+                        contenEntityTemp.Content = tempContent.Replace("\n", "").Replace(" ", "").Replace("\t", "").Replace("\r", "");
+                        foreach (var itemspan in span)
+                        {
+                            if (itemspan.ToString().Contains("楼"))//可以不要
+                            {
+                                var tempFloor = getAttContex.Match(itemspan.ToString()).ToString();
+                                var floor = tempFloor.Substring(1, tempFloor.Length - 2);
+                                contenEntityTemp.Floor = floor.Trim();
+                            }
+                            else if (itemspan.ToString().Contains(":"))//可以不要
+                            {
+                                var floorTIme = regTime.Match(itemspan.ToString()).ToString();
+                                contenEntityTemp.ReplyTime = floorTIme.Trim();
+                            }
+                            contenEntityTemp.ReplyNum = repelyNumber;
+                            contenEntityTemp.PageNum = pageNumber;
+                        }
+                        contenEntity = contenEntityTemp;
+                        listContent.Add(contenEntity);
+                    }
+                }
+                JsonHelper jsonHelper = new JsonHelper();
+                var strlistJson = jsonHelper.SerializerJson(listContent);
+                IOFileHelper ioFileHelper = new IOFileHelper();
+                if (pageSize=="1")
+                {
+                    ioFileHelper.SaveJsonFile(@"E:\jsonFileSave", "" + fileName + ".json", strlistJson);
+                }
+                else
+                {
+                    ioFileHelper.SaveJsonFile(@"E:\jsonFileSave", "" + fileName + ".json", strlistJson,true);
+                }
+                getContextModel.Flag = true;
+                getContextModel.State = "200";
+                getContextModel.Total = repelyNumber;
+                getContextModel.FullPageSIze = pageNumber;
+                var list = jsonHelper.DeserializeJsonTo<List<ContentEntity>>(strlistJson);
+                return getContextModel;
+            }
+            else
+            {
+                getContextModel.Flag = false;
+                return getContextModel;
+            }
+        }
+
 #if DEBUG
         public void InsertKeyWorld()
         {
@@ -156,4 +265,4 @@ namespace CrawlerNpro.ViewControl
 #endif
     }
 }
-}
+

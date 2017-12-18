@@ -57,7 +57,7 @@ namespace CrawlerNpro
                 txtUri.Text = url;
             }
             CrawlerNproView crawlerNproView = new CrawlerNproView();
-            crawlerNproView.SearchStart(url,);
+            //crawlerNproView.SearchStart(url,fileName);
         }
 
         private void checkHistory(object sender, SelectionChangedEventArgs e)
@@ -77,89 +77,25 @@ namespace CrawlerNpro
         /// <param name="e"></param>
         private async void BtnGetContexData(object sender, RoutedEventArgs e)
         {
-            Regex getAttContex = new Regex(@">(.*?)<");
-            Regex regTime = new Regex(@"20\d{2}(-|\/)((0[1-9])|(1[0-2]))(-|\/)((0[1-9])|([1-2][0-9])|(3[0-1]))(T|\s)(([0-1][0-9])|(2[0-3])):([0-5][0-9])");
-            string strGetConetex = null;
-            string pageNumber = null;
-            string repelyNumber = null;
-            var url = @"https://tieba.baidu.com/p/5463733135";
-            string fileName = "5463733135";
-            CrHttpRequest crHttpRequest = new CrHttpRequest();
-            strGetConetex = await crHttpRequest.SentDataAsync(HttpMethod.Post, url);
-            List<ContentEntity> listContent = new List<ContentEntity>();
-            ContentEntity contenEntity = new ContentEntity();
-            if (strGetConetex.Length > 0)
+         
+        }
+
+        public async void GetContexData(string url,string urls)
+        {
+            CrawlerNproView crawlerNproView = new CrawlerNproView();
+          var result= await crawlerNproView.GetContext(url);
+            //如果返回实体 的值不为1 就进行循环
+            var count = Convert.ToInt32(result.FullPageSIze);
+            if (count > 1)
             {
-                Document document = NSoup.NSoupClient.Parse(strGetConetex);
-                //Elements elementTbNum = document.GetElementsByClass("card_infoNum");
-                //Elements elementTbName = document.GetElementsByClass("card_title_fname");
-                Elements elementTbTitle = document.Select("div.l_post").Select("div.l_post_bright").Select("div.j_l_post").Select("div.clearfix");
-                //获取回复和分页数
-                var tempAttribute = document.Select("li.l_reply_num").First().ToString();
-                Elements pageNum = NSoup.NSoupClient.Parse(tempAttribute).Select("li.l_reply_num");
-                foreach (var item in pageNum)
+                for (int i = 2; i < count; i++)
                 {
-                    var replyNumPage = NSoup.NSoupClient.Parse(item.ToString()).Select("span").ToString();
-                    if (replyNumPage.Contains("style"))// 回复数
-                    {
-                     var tempRn  = getAttContex.Match(replyNumPage).ToString();
-                        repelyNumber= tempRn.Substring(1, tempRn.Length - 2);
-                    }
-                    if(replyNumPage.Contains("red"))//分页数
-                        {
-                        var tempPn = getAttContex.Match(replyNumPage).NextMatch().ToString();
-                        pageNumber = tempPn.Substring(1, tempPn.Length - 2);
-                    }
+               await crawlerNproView.GetContext(url);
                 }
-                this.txtContent.Text= elementTbTitle.ToString();
-                foreach (var item in elementTbTitle)
-                {
-                    ContentEntity contenEntityTemp = new ContentEntity();
-                    var data = NSoup.NSoupClient.Parse(item.ToString());
-                    Debug.WriteLine(data);
-                    //cc 标签
-                    var content = NSoup.NSoupClient.Parse(data.ToString()).Select("cc");
-                    if (content.Count==0)
-                    {
-                        Debug.WriteLine("-------------------贴内容为空-----------");
-                    }
-                    else
-                    {
-                    //span  楼层 和时间
-                    var span = data.Select("span.tail-info");
-                    contenEntityTemp.Url = url;
-                      var tempContent = Regex.Replace(content.ToString(), "<[^>]+>", "");
-                        contenEntityTemp.Content = tempContent.Replace("\n", "").Replace(" ", "").Replace("\t", "").Replace("\r", "");
-                        foreach (var itemspan in span)
-                    {
-                        if (itemspan.ToString().Contains("楼"))//可以不要
-                        {
-                            var tempFloor = getAttContex.Match(itemspan.ToString()).ToString();
-                            var floor = tempFloor.Substring(1, tempFloor.Length - 2);
-                            contenEntityTemp.Floor = floor.Trim();
-                        }
-                        else if (itemspan.ToString().Contains(":"))//可以不要
-                        {
-                            var floorTIme = regTime.Match(itemspan.ToString()).ToString();
-                            contenEntityTemp.ReplyTime = floorTIme.Trim();
-                        }
-                            contenEntityTemp.ReplyNum = repelyNumber;
-                            contenEntityTemp.PageNum = pageNumber;
-                        }
-                    contenEntity = contenEntityTemp;
-                    listContent.Add(contenEntity);
-                    }
-                }
-                JsonHelper jsonHelper = new JsonHelper();
-                var strlistJson = jsonHelper.SerializerJson(listContent);
-                IOFileHelper ioFileHelper = new IOFileHelper();
-                if (ioFileHelper.SaveJsonFile(@"C:\Users\xx\Desktop\jsonFileSave", "" + fileName + ".json", strlistjson)==false)
-                {
-                    Debug.WriteLine("文件写入出错");
-                } 
-                var list=jsonHelper.DeserializeJsonTo<List<ContentEntity>>(strlistJson);
             }
         }
+
+
 #if DEBUG
         public void InsertKeyWorld()
         {

@@ -9,8 +9,17 @@ namespace CrawlerNpro.toolkit
 {
   public  class IOFileHelper
     {
-        public bool SaveJsonFile(string filePath,string fileName,string data)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="fileName"></param>
+        /// <param name="data"></param>
+        /// <param name="isAppend">default is write </param>
+        /// <returns></returns>
+        public bool SaveJsonFile(string filePath,string fileName,string data, bool isAppend=false )
         {
+            bool flag;
             try
             {
                 if (!Directory.Exists(filePath))
@@ -18,7 +27,14 @@ namespace CrawlerNpro.toolkit
                     Directory.CreateDirectory(filePath);
                 }
                 var fileAllPath = filePath + fileName;
-                var flag = WriteTextFile(fileAllPath, data);
+                if (isAppend==true)
+                {
+                    flag = WriteAppendTextFile(fileAllPath, data);
+                }
+                else
+                {
+                    flag = WriteTextFile(fileAllPath, data);
+                }
               //  File.Move(fileAllPath,filePath);
                 return flag;
             }
@@ -51,7 +67,25 @@ namespace CrawlerNpro.toolkit
                 return false;
             }
         }
-       
+
+        public bool WriteAppendTextFile(string filePath, string data)
+        {
+            try
+            {
+                FileStream fileStream = new FileStream(filePath, FileMode.Append);
+                StreamWriter streamWriter = new StreamWriter(fileStream);
+                streamWriter.WriteLine(data);
+                streamWriter.Flush();
+                streamWriter.Close();
+                fileStream.Close();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// read txt File
         /// </summary>

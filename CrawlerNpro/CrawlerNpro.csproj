@@ -99,6 +99,7 @@
     <Compile Include="entity\KeyWorldEntity.cs" />
     <Compile Include="entity\RepliesEneity.cs" />
     <Compile Include="entity\SearchlistEntity.cs" />
+    <Compile Include="Model\GetContextModel.cs" />
     <Compile Include="ServiceInput\KeyWorldService.cs" />
     <Compile Include="ServiceInput\TBTitleFilter.cs" />
     <Compile Include="sqlDAL\TBKeyWordDAL.cs" />
