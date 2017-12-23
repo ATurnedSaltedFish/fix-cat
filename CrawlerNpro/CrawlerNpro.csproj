@@ -76,6 +76,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -94,23 +95,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="entity\ContentEntity.cs" />
-    <Compile Include="entity\TitleContentEntity.cs" />
-    <Compile Include="entity\KeyWorldEntity.cs" />
-    <Compile Include="entity\RepliesEneity.cs" />
-    <Compile Include="entity\SearchlistEntity.cs" />
+    <Compile Include="Entity\BarNameEntity.cs" />
+    <Compile Include="Entity\ContentEntity.cs" />
+    <Compile Include="Entity\TitleContentEntity.cs" />
+    <Compile Include="Entity\KeyWorldEntity.cs" />
+    <Compile Include="Entity\RepliesEneity.cs" />
+    <Compile Include="Entity\SearchlistEntity.cs" />
     <Compile Include="Model\GetContextModel.cs" />
     <Compile Include="ServiceInput\KeyWorldService.cs" />
+    <Compile Include="ServiceInput\TBNameServices.cs" />
     <Compile Include="ServiceInput\TBTitleFilter.cs" />
-    <Compile Include="sqlDAL\TBKeyWordDAL.cs" />
-    <Compile Include="sqlDAL\TBTitleListDAL.cs" />
-    <Compile Include="entity\ResultEntity.cs" />
-    <Compile Include="toolkit\CompareHelper.cs" />
-    <Compile Include="toolkit\JsonHelper.cs" />
-    <Compile Include="toolkit\MysqlConn.cs" />
-    <Compile Include="toolkit\MysqlHelper.cs" />
-    <Compile Include="toolkit\IOFileHelper.cs" />
-    <Compile Include="toolkit\TimeToolkit.cs" />
+    <Compile Include="SqlDAL\SysTBNameDAL.cs" />
+    <Compile Include="SqlDAL\SysTBKeyWordDAL.cs" />
+    <Compile Include="SqlDAL\TBTitleListDAL.cs" />
+    <Compile Include="Entity\ResultEntity.cs" />
+    <Compile Include="Toolkit\CompareHelper.cs" />
+    <Compile Include="Toolkit\JsonHelper.cs" />
+    <Compile Include="Toolkit\MysqlConn.cs" />
+    <Compile Include="Toolkit\MysqlHelper.cs" />
+    <Compile Include="Toolkit\IOFileHelper.cs" />
+    <Compile Include="Toolkit\TimeToolkit.cs" />
+    <Compile Include="Toolkit\UrlCodeConvert.cs" />
     <Compile Include="ViewControl\CrawlerNproView.cs" />
     <Page Include="CrawlerNpro.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -121,7 +126,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BaseEntity.cs" />
-    <Compile Include="toolkit\CrHttpRequest.cs" />
+    <Compile Include="Toolkit\CrHttpRequest.cs" />
     <Compile Include="CrawlerNpro.xaml.cs">
       <DependentUpon>CrawlerNpro.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -146,6 +151,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Fakes Include="Fakes\NSoup.fakes" />
+    <Content Include="CrawlerNproData\BarName.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -157,6 +165,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="SysEntity\" />
     <Folder Include="ThridDll\" />
   </ItemGroup>
   <ItemGroup>

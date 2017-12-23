@@ -11,6 +11,11 @@ namespace CrawlerNpro.ServiceInput
 {
  public   class KeyWorldService
     {
+        /// <summary>
+        /// get keyworld content from text file
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public List<KeyWorldEntity> getTextContent(string url)
         {
             List<KeyWorldEntity> listkeyWorldEntity = new List<KeyWorldEntity>();

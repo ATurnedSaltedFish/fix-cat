@@ -9,13 +9,13 @@
     <Grid>
 
         <TabControl x:Name="tabControl" HorizontalAlignment="Left" Height="780" Margin="5,30,0,0" VerticalAlignment="Top" Width="1000">
-            <TabItem Header="TabItem">
-                <Grid Background="#FAEBD7">
-                    <Button x:Name="BtnGetadata" Content="GetContent" HorizontalAlignment="Left" Margin="908,169,0,0" VerticalAlignment="Top" Width="76" Click="BtnGetData" Height="19"/>
-                    <TextBox x:Name="txtUri" HorizontalAlignment="Left" Height="32" Margin="630,119,-20,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="384" Grid.ColumnSpan="2" />
+            <TabItem Header="贴吧标题列表">
+                <Grid Background="#FAEBD7" Margin="0,0,-12,39">
+                    <Button x:Name="BtnGetadata" Content="GetContent" HorizontalAlignment="Left" Margin="920,374,0,0" VerticalAlignment="Top" Width="76" Click="BtnGetData" Height="18"/>
+                    <TextBox x:Name="txtUri" HorizontalAlignment="Left" Height="32" Margin="629,322,-7,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="384" />
                     <TextBox x:Name="txtContent" HorizontalAlignment="Left" Height="680" Margin="9,8,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="615"/>
 
-                    <ListBox x:Name="lsturl" Margin="629,11,4,657" SelectionChanged="checkHistory" Grid.ColumnSpan="2" >
+                    <ListBox x:Name="lsturl" Margin="629,11,4,411" SelectionChanged="checkHistory" >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -28,28 +28,16 @@
                     </ListBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="TabItem">
+            <TabItem Header="内容列表">
                 <Grid Background="#FAEBD7">
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="181*"/>
                         <ColumnDefinition Width="23*"/>
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="BtnGetContentData" Content="GetContent" HorizontalAlignment="Left" Margin="729,12,0,0" VerticalAlignment="Top" Width="76" Click="BtnGetContexData"/>
-                    <TextBox x:Name="txtTitleUri" HorizontalAlignment="Left" Height="32" Margin="97,5,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="608" />
-                    <TextBox x:Name="txtTitleContent" HorizontalAlignment="Left" Height="680" Margin="380,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="614" Grid.ColumnSpan="2"/>
-
-                    <ListBox x:Name="lsturls" Margin="10,44,511,29" SelectionChanged="checkHistory" >
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <TextBlock Background="Azure" Text="{Binding SearchContent}"  FontSize=" 13"></TextBlock>
-                                </Grid>
-                            </DataTemplate>
-
-                        </ListBox.ItemTemplate>
-
-                    </ListBox>
+                    <TextBox x:Name="txtTitleUri" HorizontalAlignment="Left" Height="32" Margin="10,7,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="516" />
+                    <TextBox x:Name="txtTitleContent" HorizontalAlignment="Left" Height="662" Margin="10,57,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="614"/>
+                    <Button x:Name="BtnGetContentData" Content="GetContent" HorizontalAlignment="Left" Margin="548,10,0,0" VerticalAlignment="Top" Width="76" Click="BtnGetContexData"/>
                 </Grid>
             </TabItem>
         </TabControl>

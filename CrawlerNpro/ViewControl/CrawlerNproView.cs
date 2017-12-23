@@ -13,15 +13,22 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
+using System.Configuration;
+using CrawlerNpro.SqlDAL;
 
 namespace CrawlerNpro.ViewControl
 {
- public   class CrawlerNproView
+    public class CrawlerNproView
     {
-  
-        public async void SearchStart(string url,string fileName)
+
+        /// <summary>
+        /// 搜索开始
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="fileName"></param>
+        public async void SearchStart(string url, string fileName)
         {
+            string JsonContentPath = ConfigurationManager.AppSettings["JsonContentPath"];
             Elements elements;
             string strGetConetex = null;
             CrHttpRequest crHttpRequest = new CrHttpRequest();
@@ -74,7 +81,14 @@ namespace CrawlerNpro.ViewControl
                         }
                     }
                     IOFileHelper ioFileHelper = new IOFileHelper();
-                    if (ioFileHelper.SaveJsonFile(@"E:\jsonFileSave\", "" + fileName + ".json", FilterListResultEntity.ToString(),false) == false)
+                    JsonHelper jsonHelper = new JsonHelper();
+                    var jsonData = jsonHelper.SerializerJson(FilterListResultEntity);
+                    if (jsonData == null)
+                    {
+                        Debug.WriteLine("写入json之前 序列化出错");
+                    }
+                    ///写入json 文件之前 把实体转换为json字符串
+                    if (ioFileHelper.SaveJsonFile(JsonContentPath, "" + fileName + ".json", jsonData, false) == false)
                     {
                         Debug.WriteLine("文件写入出错");
                     }
@@ -127,11 +141,11 @@ namespace CrawlerNpro.ViewControl
             }
         }
 
-
-        public  async Task<GetContextModel>  GetContext(string url ,string pageSize="1")
+        public async Task<GetContextModel> GetContext(string url, string pageSize = "1")
         {
             GetContextModel getContextModel = new GetContextModel();
-            if (url==null||pageSize==null)
+            string JsonContentPath = ConfigurationManager.AppSettings["JsonContentPath"];
+            if (url == null || pageSize == null)
             {
                 //错误报告?pn=3
                 //  url = @"5463733135";
@@ -163,7 +177,7 @@ namespace CrawlerNpro.ViewControl
                     {
                         var tempRn = getAttContex.Match(replyNumPage).ToString();
                         repelyNumber = tempRn.Substring(1, tempRn.Length - 2);
-              
+
                     }
                     if (replyNumPage.Contains("red"))//分页数
                     {
@@ -181,7 +195,7 @@ namespace CrawlerNpro.ViewControl
                     var content = NSoup.NSoupClient.Parse(data.ToString()).Select("cc");
                     if (content.Count == 0)
                     {
-                         getContextModel.State = "300";
+                        getContextModel.State = "300";
                         Debug.WriteLine("-------------------贴内容为空----error400-------");
                     }
                     else
@@ -214,13 +228,13 @@ namespace CrawlerNpro.ViewControl
                 JsonHelper jsonHelper = new JsonHelper();
                 var strlistJson = jsonHelper.SerializerJson(listContent);
                 IOFileHelper ioFileHelper = new IOFileHelper();
-                if (pageSize=="1")
+                if (pageSize == "1")
                 {
-                    ioFileHelper.SaveJsonFile(@"E:\jsonFileSave", "" + fileName + ".json", strlistJson);
+                    ioFileHelper.SaveJsonFile(JsonContentPath, "" + fileName + ".json", strlistJson);
                 }
                 else
                 {
-                    ioFileHelper.SaveJsonFile(@"E:\jsonFileSave", "" + fileName + ".json", strlistJson,true);
+                    ioFileHelper.SaveJsonFile(JsonContentPath, "" + fileName + ".json", strlistJson, true);
                 }
                 getContextModel.Flag = true;
                 getContextModel.State = "200";
@@ -237,12 +251,15 @@ namespace CrawlerNpro.ViewControl
         }
 
 #if DEBUG
+        /// <summary>
+        /// 插入索引 手动执行
+        /// </summary>
         public void InsertKeyWorld()
         {
-            string txtFileUrl = @"C:\Users\LcAns\Desktop\SearchIndex.txt";
+            string SearchIndex = ConfigurationManager.AppSettings["SearchIndex"];
             KeyWorldService keyWorldService = new KeyWorldService();
-            TBKeyWordDAL tBKeywordDAL = new TBKeyWordDAL();
-            var list = keyWorldService.getTextContent(txtFileUrl);
+            SysTBKeyWordDAL tBKeywordDAL = new SysTBKeyWordDAL();
+            var list = keyWorldService.getTextContent(SearchIndex);
             var result = tBKeywordDAL.InsertSysKeyworld(MySqlConn.GetMysqlConn(), list);
             if (result == 0)
             {
@@ -252,7 +269,7 @@ namespace CrawlerNpro.ViewControl
 
         public List<KeyWorldEntity> SelectKeyWorld()
         {
-            TBKeyWordDAL tBKeyWordDAL = new TBKeyWordDAL();
+            SysTBKeyWordDAL tBKeyWordDAL = new SysTBKeyWordDAL();
             var list = tBKeyWordDAL.SelectSysKeyworld(MySqlConn.GetMysqlConn(), null);
             if (list.Count < 0)
             {
@@ -262,7 +279,57 @@ namespace CrawlerNpro.ViewControl
             return list;
         }
 
+        /// <summary>
+        /// 读取本地txt文件 把贴吧名字写入到数据库
+        /// </summary>
+        public void InsertTieBarName()
+        {
+            string tBName = ConfigurationManager.AppSettings["TBName"];
+            TBNameServices tBNameServices = new TBNameServices();
+            var list = tBNameServices.InsertJson(tBName);
+            if (list == false)
+            {
+                Debug.WriteLine("insert index data failed");
+            }
+        }
+
+        ///java sys
+        /// <summary>
+        /// read database  to local json file
+        /// </summary>
+        public void SaveTBNameToJson(Uri JsonPath = null)
+        {
+            //读取数据库
+            SysTBNameDAL sysTBNAMEDAL = new SysTBNameDAL();
+            var listTBName = sysTBNAMEDAL.SelectTBName(MySqlConn.GetMysqlConn(), null);
+            //转换json 
+            JsonHelper jsonHelper = new JsonHelper();
+            var strJson = jsonHelper.SerializerJson(listTBName);
+            //保存文件
+            IOFileHelper iOFileHelper = new IOFileHelper();
+            string JsonContentPath = ConfigurationManager.AppSettings["JsonContentPath"];
+            iOFileHelper.SaveJsonFile(JsonContentPath, "BarName.json", strJson);//文件名写死
+        }
 #endif
+        /// <summary>
+        /// 读取applocal  json 文件贴吧Name
+        /// </summary>
+        /// <param name="JsonPath"></param>
+        public static List<BarNameEntity> ReadTBNameFile(Uri JsonPath = null)
+        {
+            try
+            {
+                IOFileHelper iOFileHelper = new IOFileHelper();
+                var strJson = iOFileHelper.ReadJsonFileToString(@"/CrawlerNproData/BarName.json");
+                JsonHelper jsonHelper = new JsonHelper();
+                return jsonHelper.DeserializeJsonTo<List<BarNameEntity>>(strJson);
+            }
+            catch 
+            {
+                Debug.WriteLine("-------cls-CrawlerNproView------func ReadTBNameFile----");
+            }
+            return null;
+        }
     }
 }
 

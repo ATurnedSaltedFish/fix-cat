@@ -7,13 +7,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+#if DEBUG
 namespace CrawlerNpro.sqlDAL
 {
-    public class TBKeyWordDAL
+    public class SysTBKeyWordDAL
     {
-
-#if DEBUG
         /// <summary>
         /// inseer keyworld
         /// </summary>
@@ -23,7 +21,7 @@ namespace CrawlerNpro.sqlDAL
         public int InsertSysKeyworld(MySqlConnection sqlconn, List<KeyWorldEntity> listKeyWorldEntity)
         {
             int result = 0;
-            KeyWorldEntity keyWorldEntity = new KeyWorldEntity();
+            //KeyWorldEntity keyWorldEntity = new KeyWorldEntity();
             string sql = "INSERT INTO homefood.sys_key_world(KeyWorld,HotLeve) VALUE(@KeyWorld,@HotLeve)";
             try
             {
