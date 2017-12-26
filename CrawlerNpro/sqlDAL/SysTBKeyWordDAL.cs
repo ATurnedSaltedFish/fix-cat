@@ -1,4 +1,6 @@
 ﻿using CrawlerNpro.entity;
+using CrawlerNpro.Interface;
+using CrawlerNpro.toolkit;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -13,13 +15,15 @@ namespace CrawlerNpro.sqlDAL
     public class SysTBKeyWordDAL
     {
         /// <summary>
-        /// inseer keyworld
+        /// insert keyworld
         /// </summary>
         /// <param name="sqlconn"></param>
         /// <param name="listKeyWorldEntity"></param>
         /// <returns></returns>
-        public int InsertSysKeyworld(MySqlConnection sqlconn, List<KeyWorldEntity> listKeyWorldEntity)
+        public int InsertSysKeyworld(List<KeyWorldEntity> listKeyWorldEntity)
         {
+            ISQLConnection iSQLConnection = new MySqlConn();
+            var sqlconn = iSQLConnection.GetMysqlConn();
             int result = 0;
             //KeyWorldEntity keyWorldEntity = new KeyWorldEntity();
             string sql = "INSERT INTO homefood.sys_key_world(KeyWorld,HotLeve) VALUE(@KeyWorld,@HotLeve)";
@@ -52,8 +56,10 @@ namespace CrawlerNpro.sqlDAL
         /// <param name="sqlconn"></param>
         /// <param name="keyWorldEntity"></param>
         /// <returns></returns>
-        public List<KeyWorldEntity> SelectSysKeyworld(MySqlConnection sqlconn, KeyWorldEntity keyWorldEntity = null)
+        public List<KeyWorldEntity> SelectSysKeyworld(KeyWorldEntity keyWorldEntity = null)
         {
+            ISQLConnection iSQLConnection = new MySqlConn();
+            var sqlconn = iSQLConnection.GetMysqlConn();
             List<KeyWorldEntity> listKeyWorldEntity = new List<KeyWorldEntity>();
             try
             {
@@ -66,8 +72,11 @@ namespace CrawlerNpro.sqlDAL
                 foreach (DataRow dataRow in dataTable.Rows)
                 {
                     KeyWorldEntity kwEntity = new KeyWorldEntity();
+
                     kwEntity.KeyWorld = Convert.ToString(dataRow["KeyWorld"]);
+
                     kwEntity.HotLeve = Convert.ToInt32(dataRow["HotLeve"]);
+
                     listKeyWorldEntity.Add(kwEntity);
                 }
                 return listKeyWorldEntity;

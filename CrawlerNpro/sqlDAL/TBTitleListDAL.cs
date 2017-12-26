@@ -1,4 +1,5 @@
-﻿using CrawlerNpro.toolkit;
+﻿using CrawlerNpro.Interface;
+using CrawlerNpro.toolkit;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -11,8 +12,14 @@ namespace CrawlerNpro.ServiceInput
 {
     public class TBTitleListService
     {
-        public void InsertTBTItleList(MySqlConnection sqlconn, List<ResultEntity> listTitleListEntity)
+        /// <summary>
+        /// Get bar 
+        /// </summary>
+        /// <param name="listTitleListEntity"></param>
+        public void InsertTBTItleList(List<ResultEntity> listTitleListEntity)
         {
+            ISQLConnection iSQLConnection = new MySqlConn();
+            var sqlconn = iSQLConnection.GetMysqlConn();
             ResultEntity titleListEntity = new ResultEntity();
             string sql = "INSERT INTO homefood.bdtiebalist(Title,Url,Uname,Uid,Replies,CreateCode) VALUE(@Title,@Url,@Uname,@Uid,@Replies,@CreateCode)";
             try
@@ -36,7 +43,6 @@ namespace CrawlerNpro.ServiceInput
 
                     MySqlParameter CreateCode = new MySqlParameter("@CreateCode", MySqlDbType.String);
                     CreateCode.Value = "15652123testcode";
-
 
                     MySqlCommand cmd = new MySqlCommand(sql, sqlconn);
                     cmd.Parameters.Add(title);

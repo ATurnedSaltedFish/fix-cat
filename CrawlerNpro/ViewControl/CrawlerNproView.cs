@@ -10,11 +10,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Configuration;
 using CrawlerNpro.SqlDAL;
+using CrawlerNpro.Enum;
 
 namespace CrawlerNpro.ViewControl
 {
@@ -28,6 +28,8 @@ namespace CrawlerNpro.ViewControl
         /// <param name="fileName"></param>
         public async void SearchStart(string url, string fileName)
         {
+            ViewEnum.searchEnum searchEmum = new ViewEnum.searchEnum();
+ 
             string JsonContentPath = ConfigurationManager.AppSettings["JsonContentPath"];
             Elements elements;
             string strGetConetex = null;
@@ -42,7 +44,7 @@ namespace CrawlerNpro.ViewControl
                 Elements elementTbNum = document.GetElementsByClass("card_infoNum");
                 Elements elementTbName = document.GetElementsByClass("card_title_fname");
                 Elements elementTbTitle = document.Select("li.j_thread_list").Select("li.clearfix");
-                List<TitleContentEntity> listContentEntity = new List<TitleContentEntity>();//内容
+                List<TitleContentEntity> listContentEntity = new List<TitleContentEntity>();//内容 //有错误
                 List<ResultEntity> listResultEntity = new List<ResultEntity>();//所有内容
                 try
                 {
@@ -92,15 +94,26 @@ namespace CrawlerNpro.ViewControl
                     {
                         Debug.WriteLine("文件写入出错");
                     }
-                    TBTitleListService tBTitleListService = new TBTitleListService();
-                    tBTitleListService.InsertTBTItleList(MySqlConn.GetMysqlConn(), FilterListResultEntity);//添加到数据库
+                    switch (searchEmum)
+                    {
+                        case ViewEnum.searchEnum.WriteMysql:
+                            TBTitleListService tBTitleListService = new TBTitleListService();
+                            tBTitleListService.InsertTBTItleList(FilterListResultEntity);//添加到mysql数据库
+                            break;
+                        case ViewEnum.searchEnum.WriteSQLite:
+                      
+                            break;
+                        case ViewEnum.searchEnum.WriteAll:
+                            break;
+                    }
                 }
                 catch (Exception e)
                 {
                     Debug.WriteLine("-------CrawlerNproView Error------" + e);
                 }
+                #region foreach 
                 //      //********************************************************************************//
-                //    List<ContentEntity> listContentEntity = new List<ContentEntity>();//内容
+                //    List<ContentEntity> listContentEntity = new List<ContentEntity>();//内容 有错误 应该是标题
                 //    List<RepliesEneity> listRepliesEneity = new List<RepliesEneity>();//回复
                 //    this.txtContent.Text = elementTbUrl.ToString();
                 //    foreach (var itemPrplies in elementTbChildReplies)
@@ -138,9 +151,16 @@ namespace CrawlerNpro.ViewControl
                 //    // tBTitleListService.InsertTBTItleList(MySqlConn.GetMysqlConn(), listTitleListEntity);添加到数据库
                 //    //Elements elementTbChildTitle = docomentChild.Select("a.j_th_tit");
                 //    //this.txtContent.Text = elementTbChildReplies.ToString()+"//**//"+"/n/r"+ elementTbChildTitle.ToString() +"//***//";
+                #endregion
             }
         }
 
+        /// <summary>
+        /// 内容
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         public async Task<GetContextModel> GetContext(string url, string pageSize = "1")
         {
             GetContextModel getContextModel = new GetContextModel();
@@ -250,27 +270,40 @@ namespace CrawlerNpro.ViewControl
             }
         }
 
+        public string UrlFiler(string tBName, string page="1")
+        {
+            // https://tieba.baidu.com/f?kw=%E5%BF%B5%E7%A0%B4&ie=utf-8
+            //tbUrlHead=https://tieba.baidu.com/f?kw=
+            UrlCodeConvert urlCodeConvert = new UrlCodeConvert();
+            string tbUrlHead = ConfigurationManager.AppSettings["TBUrlhead"];
+            return tbUrlHead + urlCodeConvert.EncodeUrl(tBName)+ "ie=uft=8&pn="+page;
+        }
+
 #if DEBUG
         /// <summary>
         /// 插入索引 手动执行
-        /// </summary>
+        /// </summary>t
         public void InsertKeyWorld()
         {
             string SearchIndex = ConfigurationManager.AppSettings["SearchIndex"];
             KeyWorldService keyWorldService = new KeyWorldService();
             SysTBKeyWordDAL tBKeywordDAL = new SysTBKeyWordDAL();
             var list = keyWorldService.getTextContent(SearchIndex);
-            var result = tBKeywordDAL.InsertSysKeyworld(MySqlConn.GetMysqlConn(), list);
+            var result = tBKeywordDAL.InsertSysKeyworld(list);
             if (result == 0)
             {
                 Debug.WriteLine("insert index data failed");
             }
         }
 
+        /// <summary>
+        /// 查询标题关键字索引列表
+        /// </summary>
+        /// <returns></returns>
         public List<KeyWorldEntity> SelectKeyWorld()
         {
             SysTBKeyWordDAL tBKeyWordDAL = new SysTBKeyWordDAL();
-            var list = tBKeyWordDAL.SelectSysKeyworld(MySqlConn.GetMysqlConn(), null);
+            var list = tBKeyWordDAL.SelectSysKeyworld(null);//token
             if (list.Count < 0)
             {
                 Debug.WriteLine("select index table failed");
@@ -301,7 +334,7 @@ namespace CrawlerNpro.ViewControl
         {
             //读取数据库
             SysTBNameDAL sysTBNAMEDAL = new SysTBNameDAL();
-            var listTBName = sysTBNAMEDAL.SelectTBName(MySqlConn.GetMysqlConn(), null);
+            var listTBName = sysTBNAMEDAL.SelectTBName(null);//token
             //转换json 
             JsonHelper jsonHelper = new JsonHelper();
             var strJson = jsonHelper.SerializerJson(listTBName);
@@ -315,14 +348,24 @@ namespace CrawlerNpro.ViewControl
         /// 读取applocal  json 文件贴吧Name
         /// </summary>
         /// <param name="JsonPath"></param>
-        public static List<BarNameEntity> ReadTBNameFile(Uri JsonPath = null)
-        {
+        public static List<SearchlistEntity> ReadTBNameFile(Uri JsonPath = null)
+        {      
             try
             {
+                List<SearchlistEntity> listSearchlistEntity = new List<SearchlistEntity>();
                 IOFileHelper iOFileHelper = new IOFileHelper();
                 var strJson = iOFileHelper.ReadJsonFileToString(@"/CrawlerNproData/BarName.json");
                 JsonHelper jsonHelper = new JsonHelper();
-                return jsonHelper.DeserializeJsonTo<List<BarNameEntity>>(strJson);
+                var listEntity=  jsonHelper.DeserializeJsonTo<List<BarNameEntity>>(strJson);
+                UrlCodeConvert ucc = new UrlCodeConvert();
+                foreach (var item in listEntity)
+                {
+                    SearchlistEntity searchlistEntity = new SearchlistEntity();
+                    searchlistEntity.Title = item.BarName;
+                    searchlistEntity.SearchContent = ucc.DecodeUrl(item.Url);
+                    listSearchlistEntity.Add(searchlistEntity);
+                }
+                return listSearchlistEntity;
             }
             catch 
             {

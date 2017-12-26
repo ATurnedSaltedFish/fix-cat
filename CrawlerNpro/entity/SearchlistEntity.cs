@@ -58,11 +58,11 @@ namespace CrawlerNpro
             }
         }
 
-        public SearchlistEntity(string title, string searchContent, string checkCode)
-        {
-            this.SearchContent = searchContent;
-            this.CheckCode = checkCode;
-            this.Title = title;
-        }
+        //public SearchlistEntity(string title, string searchContent, string checkCode)
+        //{
+        //    this.SearchContent = searchContent;
+        //    this.CheckCode = checkCode;
+        //    this.Title = title;
+        //}
     }
 }

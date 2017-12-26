@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace CrawlerNpro.entity
 {
- public  class TitleContentEntity:ResultEntity
+    public class TitleContentEntity : ResultEntity
     {
         private string title;
         private string url;
+        private string createCode;//添加字段
+        private string createTime;//添加字段
 
         public string Title
         {
@@ -34,6 +36,33 @@ namespace CrawlerNpro.entity
             set
             {
                 url = value;
+            }
+        }
+
+
+        public string CreateTime
+        {
+            get
+            {
+                return createTime;
+            }
+
+            set
+            {
+                createTime = value;
+            }
+        }
+
+        public string CreateCode
+        {
+            get
+            {
+                return createCode;
+            }
+
+            set
+            {
+                createCode = value;
             }
         }
     }

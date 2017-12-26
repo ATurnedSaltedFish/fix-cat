@@ -1,6 +1,7 @@
 ﻿using CrawlerNpro.entity;
 using CrawlerNpro.ServiceInput;
 using CrawlerNpro.sqlDAL;
+using CrawlerNpro.SqlDAL;
 using CrawlerNpro.toolkit;
 using CrawlerNpro.ViewControl;
 using MySql.Data.MySqlClient;
@@ -38,12 +39,16 @@ namespace CrawlerNpro
         {
             InitializeComponent();
             CrawlerNproView cnv = new CrawlerNproView();
-         cnv.InsertTieBarName();
-          //  var datas = cnv.ReadTBNameFile();
-         //   cnv.InsertTieBarName();
-           cnv.SaveTBNameToJson();
+
+            LocTitleListDAL loct= new LocTitleListDAL();
+            loct.SelectLocalTBTitle();
+            // cnv.InsertTieBarName();
+            //  var datas = cnv.ReadTBNameFile();
+            //   cnv.InsertTieBarName();
+            //   cnv.SaveTBNameToJson();
             //  cnv.InsertKeyWorld();
-            lsturl.ItemsSource = CrawlerNproView.ReadTBNameFile();
+           var   data=  CrawlerNproView.ReadTBNameFile();
+            lsturl.ItemsSource = data;
             //lsturl.ItemsSource = new List<SearchlistEntity> {
             //   //https://tieba.baidu.com/f?kw=%E5%BF%B5%E7%A0%B4&ie=utf-8&pn=100
             //   new SearchlistEntity("念破","https://tieba.baidu.com/f?kw=%E5%BF%B5%E7%A0%B4&ie=utf-8","1"),
@@ -52,20 +57,21 @@ namespace CrawlerNpro
             //   new SearchlistEntity("五鸢","https://tieba.baidu.com/f?kw=%E4%BA%94%E9%B8%A2&ie=utf-8","4"),
             //   new SearchlistEntity("唯满侠","https://tieba.baidu.com/f?kw=%E5%94%AF%E6%BB%A1%E4%BE%A0&ie=utf-8","5"),
             // };
-        }
+       }
 
         private async void BtnGetData(object sender, RoutedEventArgs e)
         {
             Elements elements;
             string strGetConetex = null;
-            var url = this.txtUri.Text.Trim();
-            if (url == null)
+            var content = this.txtUri.Text.Trim();
+            if (content == null)
             {
-                url = lsturl.Items[0].ToString();
-                txtUri.Text = url;
+                content = lsturl.Items[0].ToString();
+                txtUri.Text = content;
             }
             CrawlerNproView crawlerNproView = new CrawlerNproView();
-            crawlerNproView.SearchStart(url, "念破");
+            var url = crawlerNproView.UrlFiler(content);
+            crawlerNproView.SearchStart(url, content);
         }
 
         private void checkHistory(object sender, SelectionChangedEventArgs e)
@@ -78,17 +84,19 @@ namespace CrawlerNpro
             }
         }
 
-
         private async void BtnGetContexData(object sender, RoutedEventArgs e)
         {
-         var flag=  await getTitleList();
+            string pagesize = "1";
+         var flag=  await getTitleList(pagesize);
+            
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="url"></param>
-        public async Task<bool> getTitleList(string filePath=null)
+        /// 
+        public async Task<bool> getTitleList( string pagesize,string filePath= null)
         {
             bool flag = false;
             var JsonContentPath = ConfigurationManager.AppSettings["JsonContentPath"];
@@ -101,7 +109,7 @@ namespace CrawlerNpro
             foreach (var fileName in fileNames)
             {
                 var file = fileName.ToString();
-                var result =await GetContextData(JsonContentPath + file + ".json");
+                var result =await GetContextData(JsonContentPath + file + ".json",pagesize);
                 flag =  result;
             }
             return flag;
@@ -111,7 +119,7 @@ namespace CrawlerNpro
         ///获取贴吧内容
         /// </summary>
         /// <param name="url"></param>
-        public async Task<bool> GetContextData(string url)
+        public async Task<bool> GetContextData(string url,string pagesize)
         {
             bool flag;
             CrawlerNproView crawlerNproView = new CrawlerNproView();
@@ -129,7 +137,5 @@ namespace CrawlerNpro
             }
             return flag;
         }
-
-
     }
 }

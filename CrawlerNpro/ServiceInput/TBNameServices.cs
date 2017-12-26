@@ -50,7 +50,7 @@ namespace CrawlerNpro.ServiceInput
         /// insert json data
         /// </summary>
         /// <param name="filepath"></param>
-        /// <returns></returns>
+        /// <returns></returns>4
         public bool InsertJson(string filepath)
         {
             try
@@ -61,7 +61,7 @@ namespace CrawlerNpro.ServiceInput
                 {
                     return false;
                 }
-                var data = sysTBNameDAL.InsertTBName(MySqlConn.GetMysqlConn(), list);
+                var data = sysTBNameDAL.InsertTBName(list);
                 if (data == 0)
                 {
                     return false;

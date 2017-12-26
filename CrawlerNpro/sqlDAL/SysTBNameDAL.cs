@@ -1,4 +1,6 @@
 ﻿using CrawlerNpro.entity;
+using CrawlerNpro.Interface;
+using CrawlerNpro.toolkit;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -14,13 +16,15 @@ namespace CrawlerNpro.SqlDAL
     {
         ///java
         /// <summary>
-        /// insert barName   data form json file 
+        ///获取贴吧名称列表 插入到mysql数据库
         /// </summary>
         /// <param name="sqlconn"></param>
         /// <param name="listBarNameEntity"></param>
         /// <returns></returns>
-        public int InsertTBName(MySqlConnection sqlconn, List<BarNameEntity> listBarNameEntity)
+        public int InsertTBName(List<BarNameEntity> listBarNameEntity)
         {
+            ISQLConnection iSQLConnection = new MySqlConn();
+            var sqlconn=  iSQLConnection.GetMysqlConn();
             int result = 0;
             string sql = "INSERT INTO homefood.bd_bar_name(BarName,Url,Type,Hot) VALUE(@BarName,@Url,@Type,@Hot)";
             try  
@@ -29,12 +33,16 @@ namespace CrawlerNpro.SqlDAL
                 {
                     MySqlParameter barName = new MySqlParameter("@BarName", MySqlDbType.String);
                     barName.Value = item.BarName;
+
                     MySqlParameter url = new MySqlParameter("@Url", MySqlDbType.String);
                     url.Value = item.Url;//数据要设计
+
                     MySqlParameter type = new MySqlParameter("@Type", MySqlDbType.String);
                     type.Value = item.Type;
+
                     MySqlParameter hot = new MySqlParameter("@Hot", MySqlDbType.Int32);
                     hot.Value = item.Hot;
+
                     MySqlCommand cmd = new MySqlCommand(sql, sqlconn);
                     cmd.Parameters.Add(barName);
                     cmd.Parameters.Add(url);
@@ -51,10 +59,18 @@ namespace CrawlerNpro.SqlDAL
             }
             return result;
         }
- 
-          ///unSafe  java  useonetime
-        public List<BarNameEntity> SelectTBName(MySqlConnection sqlconn, BarNameEntity brNameEntity=null)
+
+          
+        /// java服务端编写 不安全方法
+         /// <summary>
+         /// 给mysql查询贴吧名称列表
+         /// </summary>
+         /// <param name="brNameEntity"></param>
+         /// <returns></returns>
+        public List<BarNameEntity> SelectTBName(string token=null)
         {
+            ISQLConnection iSQLConnection = new MySqlConn();
+            var sqlconn = iSQLConnection.GetMysqlConn();
             List<BarNameEntity> listBarNameEntity = new List<BarNameEntity>();
             try
             {
@@ -80,12 +96,6 @@ namespace CrawlerNpro.SqlDAL
                 Debug.WriteLine("-------TBKeywordDAL error--------" + e);
             }
             return listBarNameEntity;
-        }
-
-        ///System
-        public void ReadJsonFile()
-        {
-
         }
     }
 }

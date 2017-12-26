@@ -69,9 +69,9 @@ namespace CrawlerNpro.toolkit
         /// </summary>
         /// <param name="fileParh"></param>
         /// <returns></returns>
-        public string ReadJsonFileToString(string fileParh)
+        public string ReadJsonFileToString(string filePath)
         {
-          Uri uri= new Uri("pack://application:,,," + fileParh, UriKind.Absolute);
+          Uri uri= new Uri("pack://application:,,," + filePath, UriKind.Absolute);
            StreamResourceInfo info = System.Windows.Application.GetContentStream(uri);
             if (info==null)
             {
