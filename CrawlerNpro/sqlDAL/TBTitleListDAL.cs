@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace CrawlerNpro.ServiceInput
 {
+    /// <summary>
+    /// mysql 逻辑
+    /// </summary>
     public class TBTitleListService
     {
         /// <summary>

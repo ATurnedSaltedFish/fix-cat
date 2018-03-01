@@ -8,6 +8,7 @@ namespace CrawlerNpro.entity
 {
     public class ContentEntity
     {
+        private int id;
         //url
         private string url;
         //content
@@ -22,7 +23,12 @@ namespace CrawlerNpro.entity
         private string replyNum;
         //pageNum
         private string pageNum;
+        private string createTime;//添加字段sqlite
+        private string updateTime;//添加字段sqlite
 
+        private string pageSize;//页数
+        private string visiable;
+        private int createCode;
         public string Url
         {
             get
@@ -48,19 +54,7 @@ namespace CrawlerNpro.entity
                 content = value;
             }
         }
-
-        public string TitleCreateTime
-        {
-            get
-            {
-                return titleCreateTime;
-            }
-
-            set
-            {
-                titleCreateTime = value;
-            }
-        }
+ 
 
         public string ReplyTime
         {
@@ -111,6 +105,97 @@ namespace CrawlerNpro.entity
             set
             {
                 pageNum = value;
+            }
+        }
+
+        public string Visiable
+        {
+            get
+            {
+                return visiable;
+            }
+
+            set
+            {
+                visiable = value;
+            }
+        }
+
+        public int CreateCode
+        {
+            get
+            {
+                return createCode;
+            }
+
+            set
+            {
+                createCode = value;
+            }
+        }
+
+        public int Id
+        {
+            get
+            {
+                return id;
+            }
+
+            set
+            {
+                id = value;
+            }
+        }
+
+        public string TitleCreateTime
+        {
+            get
+            {
+                return titleCreateTime;
+            }
+
+            set
+            {
+                titleCreateTime = value;
+            }
+        }
+
+        public string CreateTime
+        {
+            get
+            {
+                return createTime;
+            }
+
+            set
+            {
+                createTime = value;
+            }
+        }
+
+        public string UpdateTime
+        {
+            get
+            {
+                return updateTime;
+            }
+
+            set
+            {
+                updateTime = value;
+            }
+        }
+
+        public string PageSize
+        {
+            get
+            {
+                return pageSize;
+            }
+
+            set
+            {
+                pageSize = value;
             }
         }
         //infloor

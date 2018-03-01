@@ -16,7 +16,7 @@ namespace CrawlerNpro.SqlDAL
     {
         ///java
         /// <summary>
-        ///获取贴吧名称列表 插入到mysql数据库
+        ///获取贴吧名称列表 插入到mysql数据库 Visiable修改好
         /// </summary>
         /// <param name="sqlconn"></param>
         /// <param name="listBarNameEntity"></param>
@@ -26,7 +26,7 @@ namespace CrawlerNpro.SqlDAL
             ISQLConnection iSQLConnection = new MySqlConn();
             var sqlconn=  iSQLConnection.GetMysqlConn();
             int result = 0;
-            string sql = "INSERT INTO homefood.bd_bar_name(BarName,Url,Type,Hot) VALUE(@BarName,@Url,@Type,@Hot)";
+            string sql = "INSERT INTO homefood.bd_bar_name(BarName,Url,Type,Hot,Visiable) VALUE(@BarName,@Url,@Type,@Hot,@Visiable)";
             try  
             {
                 foreach (var item in listBarNameEntity)
@@ -42,6 +42,9 @@ namespace CrawlerNpro.SqlDAL
 
                     MySqlParameter hot = new MySqlParameter("@Hot", MySqlDbType.Int32);
                     hot.Value = item.Hot;
+
+                    MySqlParameter visiable = new MySqlParameter("@Visiable", MySqlDbType.Int32);
+                    visiable.Value = 1;// item.Visiable;
 
                     MySqlCommand cmd = new MySqlCommand(sql, sqlconn);
                     cmd.Parameters.Add(barName);
@@ -60,13 +63,13 @@ namespace CrawlerNpro.SqlDAL
             return result;
         }
 
-          
-        /// java服务端编写 不安全方法
-         /// <summary>
-         /// 给mysql查询贴吧名称列表
-         /// </summary>
-         /// <param name="brNameEntity"></param>
-         /// <returns></returns>
+
+        /// java服务端编写 不安全方法 Visiable修改好
+        /// <summary>
+        /// 给mysql查询贴吧名称列表
+        /// </summary>
+        /// <param name="brNameEntity"></param>
+        /// <returns></returns>
         public List<BarNameEntity> SelectTBName(string token=null)
         {
             ISQLConnection iSQLConnection = new MySqlConn();
@@ -74,7 +77,7 @@ namespace CrawlerNpro.SqlDAL
             List<BarNameEntity> listBarNameEntity = new List<BarNameEntity>();
             try
             {
-                string sql = @"SELECT BarName,Url,Type,Hot FROM homefood.bd_bar_name";
+                string sql = @"SELECT BarName,Url,Type,Hot FROM homefood.bd_bar_name WHERE  Visiable=1";
                 MySqlCommand cmd = new MySqlCommand(sql, sqlconn);
                 sqlconn.Open();
                 MySqlDataReader DataReader = cmd.ExecuteReader();

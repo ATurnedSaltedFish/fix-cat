@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CrawlerNpro.Enum
+namespace CrawlerNpro.EnumPro
 {
     public  class ViewEnum
     {

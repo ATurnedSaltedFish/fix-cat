@@ -63,7 +63,7 @@ namespace CrawlerNpro.sqlDAL
             List<KeyWorldEntity> listKeyWorldEntity = new List<KeyWorldEntity>();
             try
             {
-                string sql = @"SELECT KeyWorld,HotLeve FROM homefood.sys_key_world";
+                string sql = @"SELECT KeyWorld,HotLeve FROM homefood.sys_key_world where visiable=1";
                 MySqlCommand cmd = new MySqlCommand(sql, sqlconn);
                 sqlconn.Open();
                 MySqlDataReader DataReader = cmd.ExecuteReader();

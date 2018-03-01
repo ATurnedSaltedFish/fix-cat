@@ -14,7 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Configuration;
 using CrawlerNpro.SqlDAL;
-using CrawlerNpro.Enum;
+using CrawlerNpro.EnumPro;
 
 namespace CrawlerNpro.ViewControl
 {
@@ -26,11 +26,10 @@ namespace CrawlerNpro.ViewControl
         /// </summary>
         /// <param name="url"></param>
         /// <param name="fileName"></param>
-        public async void SearchStart(string url, string fileName)
+        public async void SearchStart(string url, string fileName,int type)
         {
-            ViewEnum.searchEnum searchEmum = new ViewEnum.searchEnum();
- 
-            string JsonContentPath = ConfigurationManager.AppSettings["JsonContentPath"];
+            ViewEnum.searchEnum searchEmum = (ViewEnum.searchEnum)type;
+            string JsonContentPath = ConfigurationManager.AppSettings["JsonContentPath"];//E:\CrawlerNproData\jsonFileSave\
             Elements elements;
             string strGetConetex = null;
             CrHttpRequest crHttpRequest = new CrHttpRequest();
@@ -62,6 +61,7 @@ namespace CrawlerNpro.ViewControl
                             var resultTitle = tempData.Substring(1, tempData.Length - 2);
                             resultEntity.Title = resultTitle;
                             resultEntity.Url = resultUrl;
+                            resultEntity.CreateCode = resultUrl.Substring(3, resultUrl.Length - 3);//校验码
                         }
                         if (elementTbChildReplies.ToString().Contains("回复"))
                         {
@@ -69,41 +69,51 @@ namespace CrawlerNpro.ViewControl
                             var tempData = regReplies.Match(elementTbChildReplies.ToString()).ToString();
                             var resultReplies = tempData.Substring(1, tempData.Length - 2);
                             resultEntity.Replies = resultReplies;
+                            resultEntity.Visiable = 1;//默认显示1
                         }
                         listResultEntity.Add(resultEntity);
                     }
                     CompareHelper compareHelper = new CompareHelper();
-                    List<ResultEntity> FilterListResultEntity = new List<ResultEntity>();//所有内容
+                    List<ResultEntity> filterListResultEntity = new List<ResultEntity>();//所有内容
                     var listkeyWorld = SelectKeyWorld();
+                    if (listkeyWorld==null)
+                    {
+                        Debug.WriteLine("--------------获取关键字失败------------------");
+                    }
                     foreach (var item in listResultEntity)
                     {
                         if (compareHelper.Compare(item.Title.Trim(), listkeyWorld, "KeyWorld"))
                         {
-                            FilterListResultEntity.Add(item);
+                            filterListResultEntity.Add(item);
                         }
                     }
                     IOFileHelper ioFileHelper = new IOFileHelper();
                     JsonHelper jsonHelper = new JsonHelper();
-                    var jsonData = jsonHelper.SerializerJson(FilterListResultEntity);
+                    var jsonData = jsonHelper.SerializerJson(filterListResultEntity);
                     if (jsonData == null)
                     {
                         Debug.WriteLine("写入json之前 序列化出错");
                     }
-                    ///写入json 文件之前 把实体转换为json字符串
-                    if (ioFileHelper.SaveJsonFile(JsonContentPath, "" + fileName + ".json", jsonData, false) == false)
-                    {
-                        Debug.WriteLine("文件写入出错");
-                    }
+                    /////写入json 文件之前 把实体转换为json字符串
+                    //if (ioFileHelper.SaveJsonFile(JsonContentPath, "" + fileName + ".json", jsonData, false) == false)
+                    //{
+                    //    Debug.WriteLine("文件写入出错");
+                    //}
                     switch (searchEmum)
                     {
                         case ViewEnum.searchEnum.WriteMysql:
                             TBTitleListService tBTitleListService = new TBTitleListService();
-                            tBTitleListService.InsertTBTItleList(FilterListResultEntity);//添加到mysql数据库
+                            tBTitleListService.InsertTBTItleList(filterListResultEntity);//添加到mysql数据库//
                             break;
                         case ViewEnum.searchEnum.WriteSQLite:
-                      
+                            LocTitleListService locTitleListService = new LocTitleListService();
+                            locTitleListService.InsertLocalTBTitleEx(filterListResultEntity);//添加到sqlite，去重update
                             break;
                         case ViewEnum.searchEnum.WriteAll:
+                            TBTitleListService tbTitleListService = new TBTitleListService();
+                            tbTitleListService.InsertTBTItleList(filterListResultEntity);//添加到mysql数据库
+                            LocTitleListService loctitleListService = new LocTitleListService();
+                            loctitleListService.InsertLocalTBTitle(filterListResultEntity);
                             break;
                     }
                 }
@@ -190,6 +200,9 @@ namespace CrawlerNpro.ViewControl
                 //获取回复和分页数
                 var tempAttribute = document.Select("li.l_reply_num").First().ToString();
                 Elements pageNum = NSoup.NSoupClient.Parse(tempAttribute).Select("li.l_reply_num");
+                contenEntity.PageSize = pageSize;//页数赋值
+                contenEntity.Visiable = "1";
+                contenEntity.CreateCode = Convert.ToInt32(url);
                 foreach (var item in pageNum)
                 {
                     var replyNumPage = NSoup.NSoupClient.Parse(item.ToString()).Select("span").ToString();
@@ -245,30 +258,40 @@ namespace CrawlerNpro.ViewControl
                         listContent.Add(contenEntity);
                     }
                 }
-                JsonHelper jsonHelper = new JsonHelper();
-                var strlistJson = jsonHelper.SerializerJson(listContent);
-                IOFileHelper ioFileHelper = new IOFileHelper();
-                if (pageSize == "1")
-                {
-                    ioFileHelper.SaveJsonFile(JsonContentPath, "" + fileName + ".json", strlistJson);
+                #region 写入到sqlite
+                LocContentListService locContentListService = new LocContentListService();
+               var result= locContentListService.InsertLocalContent(listContent);
+
+              //  locContentListService
+                #endregion
+                #region 写入到json文件
+                /*  JsonHelper jsonHelper = new JsonHelper();
+                   var strlistJson = jsonHelper.SerializerJson(listContent);
+                   IOFileHelper ioFileHelper = new IOFileHelper();
+                   if (pageSize == "1")
+                   {
+                       ioFileHelper.SaveJsonFile(JsonContentPath, "" + fileName + ".json", strlistJson);
+                   }
+                   else
+                   {
+                       ioFileHelper.SaveJsonFile(JsonContentPath, "" + fileName + ".json", strlistJson, true);
+                   }
+                   */
+                #endregion
+                getContextModel.Flag = true;
+                    getContextModel.State = "200";
+                    getContextModel.Total = repelyNumber;
+                    getContextModel.FullPageSIze = pageNumber;
+                    //var list = jsonHelper.DeserializeJsonTo<List<ContentEntity>>(strlistJson);//反序列化测试
+                    return getContextModel;
                 }
                 else
                 {
-                    ioFileHelper.SaveJsonFile(JsonContentPath, "" + fileName + ".json", strlistJson, true);
+                    getContextModel.Flag = false;
+                    return getContextModel;
                 }
-                getContextModel.Flag = true;
-                getContextModel.State = "200";
-                getContextModel.Total = repelyNumber;
-                getContextModel.FullPageSIze = pageNumber;
-                var list = jsonHelper.DeserializeJsonTo<List<ContentEntity>>(strlistJson);
-                return getContextModel;
+          
             }
-            else
-            {
-                getContextModel.Flag = false;
-                return getContextModel;
-            }
-        }
 
         public string UrlFiler(string tBName, string page="1")
         {
@@ -276,7 +299,7 @@ namespace CrawlerNpro.ViewControl
             //tbUrlHead=https://tieba.baidu.com/f?kw=
             UrlCodeConvert urlCodeConvert = new UrlCodeConvert();
             string tbUrlHead = ConfigurationManager.AppSettings["TBUrlhead"];
-            return tbUrlHead + urlCodeConvert.EncodeUrl(tBName)+ "ie=uft=8&pn="+page;
+            return tbUrlHead + urlCodeConvert.EncodeUrl(tBName)+ "&ie=uft-8&pn="+page;
         }
 
 #if DEBUG
@@ -304,7 +327,7 @@ namespace CrawlerNpro.ViewControl
         {
             SysTBKeyWordDAL tBKeyWordDAL = new SysTBKeyWordDAL();
             var list = tBKeyWordDAL.SelectSysKeyworld(null);//token
-            if (list.Count < 0)
+            if (list.Count==0&&list.Count<1)
             {
                 Debug.WriteLine("select index table failed");
                 return null;
@@ -373,6 +396,13 @@ namespace CrawlerNpro.ViewControl
             }
             return null;
         }
+        #region ComboBox 下拉框
+        public class Crcombobox
+        {
+            public int ID { set; get; }
+            public string Number { set; get; }
+        }
+        #endregion
     }
 }
 

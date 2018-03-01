@@ -13,6 +13,7 @@ namespace CrawlerNpro.entity
         private string url;
         private string type;
         private int hot;
+        private int visiable;
 
         /// <summary>
         /// baidu bar Name
@@ -75,6 +76,19 @@ namespace CrawlerNpro.entity
             set
             {
                 hot = value;
+            }
+        }
+
+        public int Visiable
+        {
+            get
+            {
+                return visiable;
+            }
+
+            set
+            {
+                visiable = value;
             }
         }
     }

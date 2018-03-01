@@ -113,7 +113,7 @@
     <Compile Include="Entity\KeyWorldEntity.cs" />
     <Compile Include="Entity\RepliesEneity.cs" />
     <Compile Include="Entity\SearchlistEntity.cs" />
-    <Compile Include="Enum\ViewEnum.cs" />
+    <Compile Include="EnumPro\ViewEnum.cs" />
     <Compile Include="Interface\ISQLConnection.cs" />
     <Compile Include="Model\GetContextModel.cs" />
     <Compile Include="ServiceInput\KeyWorldService.cs" />
@@ -128,13 +128,22 @@
     <Compile Include="SqlDAL\TBTitleListDAL.cs" />
     <Compile Include="Entity\ResultEntity.cs" />
     <Compile Include="Toolkit\CompareHelper.cs" />
+    <Compile Include="Toolkit\CrStorage.cs" />
     <Compile Include="Toolkit\JsonHelper.cs" />
     <Compile Include="Toolkit\MysqlConn.cs" />
     <Compile Include="Toolkit\MysqlHelper.cs" />
     <Compile Include="Toolkit\IOFileHelper.cs" />
     <Compile Include="Toolkit\SQLiteConn.cs" />
+    <Compile Include="Toolkit\SqliteHelper.cs" />
     <Compile Include="Toolkit\TimeToolkit.cs" />
     <Compile Include="Toolkit\UrlCodeConvert.cs" />
+    <Compile Include="UIControl\PageControl.xaml.cs">
+      <DependentUpon>PageControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UIControl\CNSetWorkTime.xaml.cs">
+      <DependentUpon>CNSetWorkTime.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewControl\CrawlerContentView.cs" />
     <Compile Include="ViewControl\CrawlerNproView.cs" />
     <Page Include="CrawlerNpro.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -150,6 +159,14 @@
       <DependentUpon>CrawlerNpro.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="UIControl\PageControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UIControl\CNSetWorkTime.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -182,7 +199,9 @@
     <Content Include="Resource\temp.db" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="SysEntity\" />

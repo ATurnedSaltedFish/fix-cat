@@ -65,7 +65,7 @@ namespace CrawlerNpro.toolkit
         }
 
         /// <summary>
-        ///  read json file 
+        ///  读取本地json文件
         /// </summary>
         /// <param name="fileParh"></param>
         /// <returns></returns>
@@ -171,5 +171,6 @@ namespace CrawlerNpro.toolkit
             }
             return str;
         }
+
     }
 }
